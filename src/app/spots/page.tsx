@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link"; // <--- INI PENTING! HARUS ADA
+import Link from "next/link";
 import { Filter, MapPinned, SearchX, Plus } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { SpotCard } from "@/components/SpotCard";
@@ -16,7 +16,6 @@ export default function SpotsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ... (useEffect, filteredSpots, toggleFacility tetap sama)
   useEffect(() => {
     async function loadSpots() {
       const supabase = getSupabaseClient();
@@ -25,10 +24,12 @@ export default function SpotsPage() {
         setLoading(false);
         return;
       }
+      
       const { data, error: fetchError } = await supabase
         .from("spots")
         .select("*")
         .order("name");
+        
       if (fetchError) {
         setError(fetchError.message);
       } else {
@@ -36,7 +37,7 @@ export default function SpotsPage() {
       }
       setLoading(false);
     }
-    void loadSpots();
+    loadSpots();
   }, []);
 
   const filteredSpots = useMemo(() => {
@@ -65,7 +66,6 @@ export default function SpotsPage() {
           <h1 className="mt-4 text-4xl font-black text-ink">Cari spot yang cocok</h1>
         </div>
 
-        {/* Struktur Div yang diperbaiki */}
         <div className="flex flex-col gap-4">
           <Link 
             href="/spots/create" 
@@ -103,9 +103,26 @@ export default function SpotsPage() {
         </div>
       </div>
 
-      {/* ... (sisa kode SupabaseNotice, error, loading, dan list tetap sama) */}
       <SupabaseNotice />
-      {/* ... (lanjutkan bagian bawah list spot kamu) ... */}
+
+      {/* Bagian List Rendering yang tadinya hilang */}
+      {loading ? (
+        <p className="text-center py-20 font-bold text-ink/50">Memuat spot...</p>
+      ) : error ? (
+        <p className="text-center py-20 text-red-500 font-bold">Error: {error}</p>
+      ) : filteredSpots.length === 0 ? (
+        <EmptyState 
+          icon={SearchX} 
+          title="Spot tidak ditemukan" 
+          description="Coba ubah filter fasilitasmu." 
+        />
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredSpots.map((spot) => (
+            <SpotCard key={spot.id} spot={spot} />
+          ))}
+        </div>
+      )}
     </main>
   );
 }
