@@ -48,7 +48,14 @@ export default function RegisterPage() {
       return;
     }
 
-    if (data.user && data.session) {
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setLoading(false);
+      setStatus("Email ini sudah terdaftar. Silakan gunakan email lain atau langsung Login.");
+      return;
+    }
+
+    
+    if (data.user) {
       const { error: profileError } = await supabase.from("profiles").upsert(
         {
           user_id: data.user.id,
@@ -68,12 +75,13 @@ export default function RegisterPage() {
 
     setLoading(false);
 
+    
     if (data.session) {
       router.push("/spots");
       return;
     }
 
-    setSuccess("Akun dibuat. Cek email kampus untuk konfirmasi sebelum login.");
+    setSuccess("Akun berhasil dibuat. Cek email kamu untuk konfirmasi sebelum login.");
   }
 
   return (
